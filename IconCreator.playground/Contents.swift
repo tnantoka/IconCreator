@@ -55,7 +55,8 @@ class IconCreator {
         let rect = CGRectMake(0.0, 0.0, length, length)
 
         let opaque = true
-        UIGraphicsBeginImageContextWithOptions(size, opaque, 0.0)
+        let scale: CGFloat = 1.0
+        UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
 
         let context = UIGraphicsGetCurrentContext()
 
