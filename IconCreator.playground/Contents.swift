@@ -19,7 +19,10 @@ class IconCreator {
         // Store
         1024.0,
     ]
-    var fontScale: CGFloat = 0.75
+    var fontSizeScale: CGFloat = 0.75
+    var fontKernScale: CGFloat = 0.0
+    var fontOffsetXScale: CGFloat = 0.0
+    var fontOffsetYScale: CGFloat = 0.0
     var fontName = ".SFUIDisplay-Ultralight"
     var string = "S"
 
@@ -54,6 +57,9 @@ class IconCreator {
         let size = CGSizeMake(length, length)
         let rect = CGRectMake(0.0, 0.0, length, length)
 
+        let offsetX = length * fontOffsetXScale
+        let offsetY = length * fontOffsetYScale
+
         let opaque = true
         let scale: CGFloat = 1.0
         UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
@@ -74,8 +80,8 @@ class IconCreator {
         string.drawInRect(
             CGRectOffset(
                 rect,
-                0.0,
-                CGRectGetMidY(rect) - CGRectGetMidY(frame)
+                0.0 + offsetX,
+                CGRectGetMidY(rect) - CGRectGetMidY(frame) + offsetY
             ),
             withAttributes: attributes
         )
@@ -88,7 +94,8 @@ class IconCreator {
     }
 
     private func textAttributes(length: CGFloat) -> [String : AnyObject] {
-        let fontSize: CGFloat = length * fontScale
+        let fontSize = length * fontSizeScale
+        let fontKern = length * fontKernScale
 
         let defaultStyle = NSParagraphStyle.defaultParagraphStyle()
         let style = defaultStyle.mutableCopy() as! NSMutableParagraphStyle
@@ -97,6 +104,7 @@ class IconCreator {
             NSFontAttributeName: UIFont(name: fontName, size: fontSize)!,
             NSForegroundColorAttributeName: textColor,
             NSParagraphStyleAttributeName: style,
+            NSKernAttributeName: fontKern,
         ]
 
         return attributes
@@ -117,7 +125,7 @@ print("$ open \(creator.rootPath)")
 let creator2 = IconCreator()
 IconCreator.loadFont("Pacifico.ttf")
 creator2.fontName = "Pacifico"
-creator2.fontScale = 0.6
+creator2.fontSizeScale = 0.6
 creator2.preview()
 
 let creator3 = IconCreator()
@@ -130,7 +138,16 @@ let creator4 = IconCreator()
 IconCreator.loadFont("devicons.ttf")
 creator4.fontName = "icomoon"
 creator4.string = "\u{e655}"
-creator4.fontScale = 0.9
+creator4.fontSizeScale = 0.9
 creator4.backgroundColor = UIColor.orangeColor()
 creator4.lengths = [150.0]
 creator4.preview()
+
+let creator5 = IconCreator()
+creator5.string = "qq"
+creator5.fontSizeScale = 0.6
+creator5.fontKernScale = -0.07
+creator5.fontOffsetXScale = -0.04
+creator5.fontOffsetYScale = -0.08
+creator5.preview()
+
