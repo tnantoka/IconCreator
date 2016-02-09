@@ -25,6 +25,8 @@ class IconCreator {
     var fontOffsetYScale: CGFloat = 0.0
     var fontName = ".SFUIDisplay-Ultralight"
     var string = "S"
+    var beforeDraw: (CGContext, CGFloat) -> Void = { _, _ in }
+    var afterDraw: (CGContext, CGFloat) -> Void = { _, _ in }
 
     init() {
         try? fileManager.createDirectoryAtPath(
@@ -64,10 +66,12 @@ class IconCreator {
         let scale: CGFloat = 1.0
         UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
 
-        let context = UIGraphicsGetCurrentContext()
+        let context = UIGraphicsGetCurrentContext()!
 
         CGContextSetFillColorWithColor(context, backgroundColor.CGColor)
         CGContextFillRect(context, rect)
+
+        beforeDraw(context, length)
 
         let attributes = textAttributes(length)
         let frame = string.boundingRectWithSize(
@@ -85,6 +89,8 @@ class IconCreator {
             ),
             withAttributes: attributes
         )
+
+        afterDraw(context, length)
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
 
@@ -150,4 +156,30 @@ creator5.fontKernScale = -0.07
 creator5.fontOffsetXScale = -0.04
 creator5.fontOffsetYScale = -0.08
 creator5.preview()
+
+let creator6 = IconCreator()
+creator6.beforeDraw = { context, length in
+    CGContextSetFillColorWithColor(context, UIColor.redColor().CGColor)
+
+    CGContextBeginPath(context)
+    CGContextMoveToPoint(context, length * 0.5, length * 0.2)
+    CGContextAddLineToPoint(context, length * 0.2, length * 0.8)
+    CGContextAddLineToPoint(context, length * 0.8, length * 0.8)
+    CGContextClosePath(context)
+
+    CGContextFillPath(context)
+}
+creator6.afterDraw = { context, length in
+    CGContextSetFillColorWithColor(context, UIColor.orangeColor().CGColor)
+
+    CGContextBeginPath(context)
+    CGContextMoveToPoint(context, length * 0.5, length * 0.35)
+    CGContextAddLineToPoint(context, length * 0.325, length * 0.725)
+    CGContextAddLineToPoint(context, length * 0.675, length * 0.725)
+    CGContextClosePath(context)
+
+    CGContextFillPath(context)
+}
+creator6.preview()
+
 
