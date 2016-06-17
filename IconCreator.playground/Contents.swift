@@ -34,6 +34,7 @@ protocol Creator {
     var prefix: String { get }
     var config: CreatorConfiguration { get }
     var extname: String { get }
+    var scale: CGFloat { get }
 
     func suffix(size: CGSize) -> String
     func data(image: UIImage) -> NSData
@@ -82,7 +83,6 @@ extension Creator {
         let offsetY = size.height * config.fontOffsetScaleY
 
         let opaque = true
-        let scale: CGFloat = 1.0
         UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
 
         let context = UIGraphicsGetCurrentContext()!
@@ -143,6 +143,9 @@ class IconCreator: Creator {
     var extname: String {
         return "png"
     }
+    var scale: CGFloat {
+        return 1.0
+    }
 
     var lengths: [CGFloat] = [
         // Phone
@@ -175,6 +178,9 @@ class LogoCreator: Creator {
     }
     var extname: String {
         return "pdf"
+    }
+    var scale: CGFloat {
+        return 3.0
     }
 
     var sizes = [CGSizeMake(200.0, 100.0)]
