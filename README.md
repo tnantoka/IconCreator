@@ -4,10 +4,10 @@ Create app icons on Playground.
 
 ```
 let c = IconCreator()
-IconCreator.loadFont("devicons.ttf")
-c.fontName = "icomoon"
-c.string = "\u{e655}"
-c.backgroundColor = UIColor.orangeColor()
+CreatorConfiguration.loadFont("devicons.ttf")
+c.config.fontName = "icomoon"
+c.config.string = "\u{e655}"
+c.config.backgroundColor = UIColor.orangeColor()
 c.preview()
 ```
 
@@ -18,6 +18,7 @@ c.preview()
 - https://www.google.com/fonts/specimen/Pacifico
 - https://fortawesome.github.io/Font-Awesome/
 - http://vorillaz.github.io/devicons/
+- https://github.com/SSA111/SwiftImageToPDFConverter
 
 ## License
 

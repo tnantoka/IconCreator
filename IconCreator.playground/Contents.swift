@@ -2,50 +2,70 @@
 
 import UIKit
 
-class IconCreator {
-    let fileManager = NSFileManager.defaultManager()
-    let docPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+// MARK: - Define Utilities
 
-    var rootPath: String {
-        return "\(docPath)/IconCreator/"
-    }
-
+struct CreatorConfiguration {
     var backgroundColor = UIColor.grayColor()
     var textColor = UIColor.whiteColor()
-    var lengths: [CGFloat] = [
-        // Phone
-        120.0,
-        180.0,
-        // Store
-        1024.0,
-    ]
-    var fontSizeScale: CGFloat = 0.75
-    var fontKernScale: CGFloat = 0.0
-    var fontOffsetXScale: CGFloat = 0.0
-    var fontOffsetYScale: CGFloat = 0.0
+    var fontSizeScaleY: CGFloat = 0.75
+    var fontKernScaleY: CGFloat = 0.0
+    var fontOffsetScaleX: CGFloat = 0.0
+    var fontOffsetScaleY: CGFloat = 0.0
     var fontName = ".SFUIDisplay-Ultralight"
     var string = "S"
-    var beforeDraw: (CGContext, CGFloat) -> Void = { _, _ in }
-    var afterDraw: (CGContext, CGFloat) -> Void = { _, _ in }
+    var beforeDraw: (CGContext, CGSize) -> Void = { _, _ in }
+    var afterDraw: (CGContext, CGSize) -> Void = { _, _ in }
+
+    static func loadFont(name: String) {
+        let font = NSBundle.mainBundle().URLForResource(name, withExtension: nil)!
+        CTFontManagerRegisterFontsForURL(font, CTFontManagerScope.Process, nil)
+    }
 
     init() {
+    }
+
+    init(string: String) {
+        self.string = string
+    }
+}
+
+protocol Creator {
+    var sizes: [CGSize] { get set }
+    var prefix: String { get }
+    var config: CreatorConfiguration { get }
+    var extname: String { get }
+
+    func suffix(size: CGSize) -> String
+    func data(image: UIImage) -> NSData
+}
+
+extension Creator {
+    var fileManager: NSFileManager {
+        return NSFileManager.defaultManager()
+    }
+    var docPath: String {
+        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+    }
+    var rootPath: String {
+        return "\(docPath)/\(self.prefix.capitalizedString)Creator/"
+    }
+
+    func preview() -> [UIImage] {
+        return sizes.map { create($0) }
+    }
+
+    func save() {
         try? fileManager.createDirectoryAtPath(
             rootPath,
             withIntermediateDirectories: false,
             attributes: nil
         )
-    }
 
-    func preview() -> [UIImage] {
-        return lengths.map { create($0) }
-    }
+        for size in sizes {
+            let image = create(size)
 
-    func save() {
-        for length in lengths {
-            let image = create(length)
-
-            let filename = "icon\(Int(length)).png"
-            let data = UIImagePNGRepresentation(image)!
+            let filename = "\(prefix)\(suffix(size)).\(extname)"
+            let data = self.data(image)
 
             fileManager.createFileAtPath(
                 "\(rootPath)\(filename)",
@@ -55,12 +75,11 @@ class IconCreator {
         }
     }
 
-    private func create(length: CGFloat) -> UIImage {
-        let size = CGSizeMake(length, length)
-        let rect = CGRectMake(0.0, 0.0, length, length)
+    private func create(size: CGSize) -> UIImage {
+        let rect = CGRect(origin: CGPointZero, size: size)
 
-        let offsetX = length * fontOffsetXScale
-        let offsetY = length * fontOffsetYScale
+        let offsetX = size.width * config.fontOffsetScaleX
+        let offsetY = size.height * config.fontOffsetScaleY
 
         let opaque = true
         let scale: CGFloat = 1.0
@@ -68,20 +87,20 @@ class IconCreator {
 
         let context = UIGraphicsGetCurrentContext()!
 
-        CGContextSetFillColorWithColor(context, backgroundColor.CGColor)
+        CGContextSetFillColorWithColor(context, config.backgroundColor.CGColor)
         CGContextFillRect(context, rect)
 
-        beforeDraw(context, length)
+        config.beforeDraw(context, size)
 
-        let attributes = textAttributes(length)
-        let frame = string.boundingRectWithSize(
+        let attributes = textAttributes(size)
+        let frame = config.string.boundingRectWithSize(
             size,
             options: [.UsesLineFragmentOrigin, .UsesFontLeading],
             attributes: attributes,
             context: nil
         )
 
-        string.drawInRect(
+        config.string.drawInRect(
             CGRectOffset(
                 rect,
                 0.0 + offsetX,
@@ -90,7 +109,7 @@ class IconCreator {
             withAttributes: attributes
         )
 
-        afterDraw(context, length)
+        config.afterDraw(context, size)
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
 
@@ -99,28 +118,89 @@ class IconCreator {
         return image
     }
 
-    private func textAttributes(length: CGFloat) -> [String : AnyObject] {
-        let fontSize = length * fontSizeScale
-        let fontKern = length * fontKernScale
+    private func textAttributes(size: CGSize) -> [String : AnyObject] {
+        let fontSize = size.height * config.fontSizeScaleY
+        let fontKern = size.height * config.fontKernScaleY
 
         let defaultStyle = NSParagraphStyle.defaultParagraphStyle()
         let style = defaultStyle.mutableCopy() as! NSMutableParagraphStyle
         style.alignment = .Center
         let attributes = [
-            NSFontAttributeName: UIFont(name: fontName, size: fontSize)!,
-            NSForegroundColorAttributeName: textColor,
+            NSFontAttributeName: UIFont(name: config.fontName, size: fontSize)!,
+            NSForegroundColorAttributeName: config.textColor,
             NSParagraphStyleAttributeName: style,
             NSKernAttributeName: fontKern,
-        ]
+            ]
 
         return attributes
     }
+}
 
-    class func loadFont(name: String) {
-        let font = NSBundle.mainBundle().URLForResource(name, withExtension: nil)!
-        CTFontManagerRegisterFontsForURL(font, CTFontManagerScope.Process, nil)
+class IconCreator: Creator {
+    var prefix: String {
+        return "icon"
+    }
+    var extname: String {
+        return "png"
+    }
+
+    var lengths: [CGFloat] = [
+        // Phone
+        120.0,
+        180.0,
+        // Store
+        1024.0,
+    ]
+    var sizes: [CGSize] {
+        get {
+            return lengths.map { CGSizeMake($0, $0) }
+        }
+        set {}
+    }
+
+    var config = CreatorConfiguration()
+
+    func suffix(size: CGSize) -> String {
+        return "\(Int(size.width))"
+    }
+
+    func data(image: UIImage) -> NSData {
+        return UIImagePNGRepresentation(image)!
     }
 }
+
+class LogoCreator: Creator {
+    var prefix: String {
+        return "logo"
+    }
+    var extname: String {
+        return "pdf"
+    }
+
+    var sizes = [CGSizeMake(200.0, 100.0)]
+
+    var config = CreatorConfiguration(string: "String")
+
+    func suffix(size: CGSize) -> String {
+        return "\(Int(size.width))x\(Int(size.height))"
+    }
+
+    func data(image: UIImage) -> NSData {
+        let data = NSMutableData()
+        let consumer = CGDataConsumerCreateWithCFData(data)
+        var box = CGRectMake(0, 0, image.size.width, image.size.height)
+
+        let context = CGPDFContextCreate(consumer, &box, nil)
+
+        CGContextBeginPage(context, &box)
+        CGContextDrawImage(context, box, image.CGImage)
+        CGContextEndPage(context)
+
+        return data
+    }
+}
+
+// MARK: - Create Icons
 
 let creator = IconCreator()
 creator.preview()
@@ -129,57 +209,63 @@ creator.save()
 print("$ open \(creator.rootPath)")
 
 let creator2 = IconCreator()
-IconCreator.loadFont("Pacifico.ttf")
-creator2.fontName = "Pacifico"
-creator2.fontSizeScale = 0.6
+CreatorConfiguration.loadFont("Pacifico.ttf")
+creator2.config.fontName = "Pacifico"
+creator2.config.fontSizeScaleY = 0.6
 creator2.preview()
 
 let creator3 = IconCreator()
-IconCreator.loadFont("FontAwesome.otf")
-creator3.fontName = "FontAwesome"
-creator3.string = "\u{f09b}"
+CreatorConfiguration.loadFont("FontAwesome.otf")
+creator3.config.fontName = "FontAwesome"
+creator3.config.string = "\u{f09b}"
 creator3.preview()
 
 let creator4 = IconCreator()
-IconCreator.loadFont("devicons.ttf")
-creator4.fontName = "icomoon"
-creator4.string = "\u{e655}"
-creator4.fontSizeScale = 0.9
-creator4.backgroundColor = UIColor.orangeColor()
+CreatorConfiguration.loadFont("devicons.ttf")
+creator4.config.fontName = "icomoon"
+creator4.config.string = "\u{e655}"
+creator4.config.fontSizeScaleY = 0.9
+creator4.config.backgroundColor = UIColor.orangeColor()
 creator4.lengths = [150.0]
 creator4.preview()
 
 let creator5 = IconCreator()
-creator5.string = "qq"
-creator5.fontSizeScale = 0.6
-creator5.fontKernScale = -0.07
-creator5.fontOffsetXScale = -0.04
-creator5.fontOffsetYScale = -0.08
+creator5.config.string = "qq"
+creator5.config.fontSizeScaleY = 0.6
+creator5.config.fontKernScaleY = -0.07
+creator5.config.fontOffsetScaleX = -0.04
+creator5.config.fontOffsetScaleY = -0.08
 creator5.preview()
 
 let creator6 = IconCreator()
-creator6.beforeDraw = { context, length in
+creator6.config.beforeDraw = { context, size in
     CGContextSetFillColorWithColor(context, UIColor.redColor().CGColor)
 
     CGContextBeginPath(context)
-    CGContextMoveToPoint(context, length * 0.5, length * 0.2)
-    CGContextAddLineToPoint(context, length * 0.2, length * 0.8)
-    CGContextAddLineToPoint(context, length * 0.8, length * 0.8)
+    CGContextMoveToPoint(context, size.width * 0.5, size.width * 0.2)
+    CGContextAddLineToPoint(context, size.width * 0.2, size.width * 0.8)
+    CGContextAddLineToPoint(context, size.width * 0.8, size.width * 0.8)
     CGContextClosePath(context)
 
     CGContextFillPath(context)
 }
-creator6.afterDraw = { context, length in
+creator6.config.afterDraw = { context, size in
     CGContextSetFillColorWithColor(context, UIColor.orangeColor().CGColor)
 
     CGContextBeginPath(context)
-    CGContextMoveToPoint(context, length * 0.5, length * 0.35)
-    CGContextAddLineToPoint(context, length * 0.325, length * 0.725)
-    CGContextAddLineToPoint(context, length * 0.675, length * 0.725)
+    CGContextMoveToPoint(context, size.width * 0.5, size.width * 0.35)
+    CGContextAddLineToPoint(context, size.width * 0.325, size.width * 0.725)
+    CGContextAddLineToPoint(context, size.width * 0.675, size.width * 0.725)
     CGContextClosePath(context)
 
     CGContextFillPath(context)
 }
 creator6.preview()
 
+// MARK: - Create Logo
 
+let logoCreator = LogoCreator()
+logoCreator.preview()
+
+logoCreator.save()
+print("$ open \(logoCreator.rootPath)")
