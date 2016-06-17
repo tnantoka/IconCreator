@@ -38,6 +38,7 @@ Pull requests are welcome!
 - http://vorillaz.github.io/devicons/
 - https://github.com/SSA111/SwiftImageToPDFConverter
 - https://www.google.com/fonts/specimen/Italiana
+- https://www.google.com/fonts/specimen/Megrim
 
 ## License
 
