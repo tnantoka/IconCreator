@@ -7,17 +7,17 @@ CreatorConfiguration.loadFont("Italiana-Regular.ttf")
 
 let iconCreator = IconCreator()
 iconCreator.config.fontName = "Italiana"
-iconCreator.lengths = [120.0]
+iconCreator.lengths = [180.0]
 iconCreator.config.string = "IC"
 iconCreator.config.fontKernScaleY = -0.14
 iconCreator.config.fontOffsetScaleX = -0.06
 iconCreator.config.fontSizeScaleY = 0.84
-iconCreator.config.backgroundColor = UIColor.whiteColor()
+iconCreator.config.backgroundColor = UIColor(red: 237.0 / 255.0, green: 237.0 / 255.0, blue: 237.0 / 255.0, alpha: 1.0)
 iconCreator.config.textColor = UIColor(white: 0.0, alpha: 0.87)
 
 iconCreator.preview()
 
-//creator.save()
+iconCreator.save()
 print("$ open \(iconCreator.rootPath)")
 
 
