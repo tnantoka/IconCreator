@@ -1,4 +1,4 @@
-# <img src="/icon.png" align="top" width="50" height="50"> IconCreator
+![](/logo.png)
 
 Create app icons programmatically on Playground with Swift and Xcode.
 
@@ -24,6 +24,7 @@ print("$ open \(creator.rootPath)") // $ open /path/to/Documents/IconCreator/
 [![](/showcase/140note.png)](http://www.140note.com/)
 [![](https://raw.githubusercontent.com/tnantoka/AppBoard/master/AppBoard/Assets.xcassets/AppIcon.appiconset/icon120.png)](https://github.com/tnantoka/AppBoard)
 [![](/showcase/remaining.png)](http://remaining.bornneet.com/)
+[![](/showcase/iconcreator.png)](/showcase/iconcreator.png)
 
 - [icon.png](/icon.png)
 - [logo.pdf](/logo.pdf)
