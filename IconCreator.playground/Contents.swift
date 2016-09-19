@@ -2,7 +2,7 @@
 
 import UIKit
 
-CreatorConfiguration.loadFont("Italiana-Regular.ttf")
+CreatorConfiguration.loadFont(name: "Italiana-Regular.ttf")
 
 
 let iconCreator = IconCreator()
@@ -23,8 +23,8 @@ print("$ open \(iconCreator.rootPath)")
 
 let logoCreator = LogoCreator()
 logoCreator.config.fontName = iconCreator.config.fontName
-logoCreator.sizes = [CGSizeMake(600.0, 150.0)]
-logoCreator.config.string = "IconCreator".uppercaseString
+logoCreator.sizes = [CGSize(width: 600.0, height: 150.0)]
+logoCreator.config.string = "IconCreator".uppercased()
 logoCreator.config.backgroundColor = iconCreator.config.backgroundColor
 logoCreator.config.textColor = iconCreator.config.textColor
 logoCreator.config.fontSizeScaleY = 0.6

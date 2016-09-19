@@ -1,8 +1,8 @@
 import UIKit
 
 public struct CreatorConfiguration {
-    public var backgroundColor = UIColor.grayColor()
-    public var textColor = UIColor.whiteColor()
+    public var backgroundColor = UIColor.gray
+    public var textColor = UIColor.white
     public var fontSizeScaleY: CGFloat = 0.75
     public var fontKernScaleY: CGFloat = 0.0
     public var fontOffsetScaleX: CGFloat = 0.0
@@ -13,8 +13,8 @@ public struct CreatorConfiguration {
     public var afterDraw: (CGContext, CGSize) -> Void = { _, _ in }
     
     public static func loadFont(name: String) {
-        let font = NSBundle.mainBundle().URLForResource(name, withExtension: nil)!
-        CTFontManagerRegisterFontsForURL(font, CTFontManagerScope.Process, nil)
+        let font = Bundle.main.url(forResource: name, withExtension: nil)!
+        CTFontManagerRegisterFontsForURL(font as CFURL, CTFontManagerScope.process, nil)
     }
     
     init() {
@@ -34,39 +34,39 @@ public protocol Creator {
     var scale: CGFloat { get }
     
     func suffix(size: CGSize) -> String
-    func data(image: UIImage) -> NSData
+    func data(image: UIImage) -> Data
 }
 
 public extension Creator {
-    var fileManager: NSFileManager {
-        return NSFileManager.defaultManager()
+    var fileManager: FileManager {
+        return FileManager.default
     }
     var docPath: String {
-        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+        return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
     }
     var rootPath: String {
-        return "\(docPath)/\(self.prefix.capitalizedString)Creator/"
+        return "\(docPath)/\(self.prefix.capitalized)Creator/"
     }
     
     func preview() -> [UIImage] {
-        return sizes.map { create($0) }
+        return sizes.map { create(size: $0) }
     }
     
     func save() {
-        let _ = try? fileManager.createDirectoryAtPath(
-            rootPath,
+        let _ = try? fileManager.createDirectory(
+            atPath: rootPath,
             withIntermediateDirectories: false,
             attributes: nil
         )
         
         for size in sizes {
-            let image = create(size)
+            let image = create(size: size)
             
-            let filename = "\(prefix)\(suffix(size)).\(extname)"
-            let data = self.data(image)
+            let filename = "\(prefix)\(suffix(size: size)).\(extname)"
+            let data = self.data(image: image)
             
-            fileManager.createFileAtPath(
-                "\(rootPath)\(filename)",
+            fileManager.createFile(
+                atPath: "\(rootPath)\(filename)",
                 contents: data,
                 attributes: nil
             )
@@ -74,7 +74,7 @@ public extension Creator {
     }
     
     private func create(size: CGSize) -> UIImage {
-        let rect = CGRect(origin: CGPointZero, size: size)
+        let rect = CGRect(origin: CGPoint.zero, size: size)
         
         let offsetX = size.width * config.fontOffsetScaleX
         let offsetY = size.height * config.fontOffsetScaleY
@@ -84,24 +84,23 @@ public extension Creator {
         
         let context = UIGraphicsGetCurrentContext()!
         
-        CGContextSetFillColorWithColor(context, config.backgroundColor.CGColor)
-        CGContextFillRect(context, rect)
+        context.setFillColor(config.backgroundColor.cgColor)
+        context.fill(rect)
         
         config.beforeDraw(context, size)
         
-        let attributes = textAttributes(size)
-        let frame = config.string.boundingRectWithSize(
-            size,
-            options: [.UsesLineFragmentOrigin, .UsesFontLeading],
+        let attributes = textAttributes(size: size)
+        let frame = config.string.boundingRect(
+            with: size,
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
             attributes: attributes,
             context: nil
         )
         
-        config.string.drawInRect(
-            CGRectOffset(
-                rect,
-                0.0 + offsetX,
-                CGRectGetMidY(rect) - CGRectGetMidY(frame) + offsetY
+        config.string.draw(
+            in: rect.offsetBy(
+                dx: 0.0 + offsetX,
+                dy: rect.midY - frame.midY + offsetY
             ),
             withAttributes: attributes
         )
@@ -112,17 +111,17 @@ public extension Creator {
         
         UIGraphicsEndImageContext()
         
-        return image
+        return image!
     }
     
-    private func textAttributes(size: CGSize) -> [String : AnyObject] {
+    private func textAttributes(size: CGSize) -> [String : Any] {
         let fontSize = size.height * config.fontSizeScaleY
         let fontKern = size.height * config.fontKernScaleY
         
-        let defaultStyle = NSParagraphStyle.defaultParagraphStyle()
+        let defaultStyle = NSParagraphStyle.default
         let style = defaultStyle.mutableCopy() as! NSMutableParagraphStyle
-        style.alignment = .Center
-        let attributes = [
+        style.alignment = .center
+        let attributes: [String : Any] = [
             NSFontAttributeName: UIFont(name: config.fontName, size: fontSize)!,
             NSForegroundColorAttributeName: config.textColor,
             NSParagraphStyleAttributeName: style,
@@ -143,7 +142,7 @@ public class IconCreator: Creator {
         ]
     public var sizes: [CGSize] {
         get {
-            return lengths.map { CGSizeMake($0, $0) }
+            return lengths.map { CGSize(width: $0, height: $0) }
         }
         set {}
     }
@@ -163,7 +162,7 @@ public class IconCreator: Creator {
         return "\(Int(size.width))"
     }
     
-    public func data(image: UIImage) -> NSData {
+    public func data(image: UIImage) -> Data {
         return UIImagePNGRepresentation(image)!
     }
     
@@ -173,7 +172,7 @@ public class IconCreator: Creator {
 }
 
 public class LogoCreator: Creator {
-    public var sizes = [CGSizeMake(200.0, 100.0)]
+    public var sizes = [CGSize(width: 200.0, height: 100.0)]
     public var config = CreatorConfiguration(string: "String")
     
     public var prefix: String {
@@ -190,18 +189,19 @@ public class LogoCreator: Creator {
         return "\(Int(size.width))x\(Int(size.height))"
     }
     
-    public func data(image: UIImage) -> NSData {
+    public func data(image: UIImage) -> Data {
         let data = NSMutableData()
-        let consumer = CGDataConsumerCreateWithCFData(data)
-        var box = CGRectMake(0, 0, image.size.width, image.size.height)
+        let consumer = CGDataConsumer(data: data)
+        var box = CGRect(origin: .zero, size: image.size)
+
+        let context = CGContext(consumer: consumer!, mediaBox: &box, nil)!
         
-        let context = CGPDFContextCreate(consumer, &box, nil)
+        context.beginPDFPage(nil)
+        context.draw(image.cgImage!, in: box)
+        context.endPDFPage()
+        context.closePDF()
         
-        CGContextBeginPage(context, &box)
-        CGContextDrawImage(context, box, image.CGImage)
-        CGContextEndPage(context)
-        
-        return data
+        return data as Data
     }
     
     public init() {
