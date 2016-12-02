@@ -44,3 +44,6 @@ Pull requests are welcome!
 My code is licensed under the MIT license.  
 **Each font has its own license!**
 
+## See Also
+
+[tnantoka/ScreenshotCreator](https://github.com/tnantoka/ScreenshotCreator)
