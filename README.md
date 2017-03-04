@@ -25,8 +25,9 @@ print("$ open \(creator.rootPath)") // $ open /path/to/Documents/IconCreator/
 [![](https://raw.githubusercontent.com/tnantoka/AppBoard/master/AppBoard/Assets.xcassets/AppIcon.appiconset/icon120.png)](https://github.com/tnantoka/AppBoard)
 [![](/showcase/remaining.png)](http://remaining.bornneet.com/)
 [![](/showcase/iconcreator.png)](/showcase/iconcreator.png)
+![](/showcase/icon.png)
+![](/showcase/grid.png)
 
-- [icon.png](/icon.png)
 - [logo.pdf](/logo.pdf)
 
 Pull requests are welcome!

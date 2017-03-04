@@ -1,5 +1,9 @@
 import UIKit
 
+public enum CreatorGrid {
+    case none, preview, previewAndSave
+}
+
 public struct CreatorConfiguration {
     public var backgroundColor = UIColor.gray
     public var textColor = UIColor.white
@@ -11,6 +15,8 @@ public struct CreatorConfiguration {
     public var string = "S"
     public var beforeDraw: (CGContext, CGSize) -> Void = { _, _ in }
     public var afterDraw: (CGContext, CGSize) -> Void = { _, _ in }
+    public var grid = CreatorGrid.none
+    public var gridColor = UIColor.lightGray
     
     public static func loadFont(name: String) {
         let font = Bundle.main.url(forResource: name, withExtension: nil)!
@@ -49,7 +55,7 @@ public extension Creator {
     }
     
     func preview() -> [UIImage] {
-        return sizes.map { create(size: $0) }
+        return sizes.map { create(size: $0, previewing: true) }
     }
     
     func save() {
@@ -60,7 +66,7 @@ public extension Creator {
         )
         
         for size in sizes {
-            let image = create(size: size)
+            let image = create(size: size, previewing: false)
             
             let filename = "\(prefix)\(suffix(size: size)).\(extname)"
             let data = self.data(image: image)
@@ -73,7 +79,7 @@ public extension Creator {
         }
     }
     
-    private func create(size: CGSize) -> UIImage {
+    private func create(size: CGSize, previewing: Bool) -> UIImage {
         let rect = CGRect(origin: CGPoint.zero, size: size)
         
         let offsetX = size.width * config.fontOffsetScaleX
@@ -106,7 +112,11 @@ public extension Creator {
         )
         
         config.afterDraw(context, size)
-        
+
+        if config.grid == .preview && previewing || config.grid == .previewAndSave {
+            drawGrid(context: context, size: size)
+        }
+
         let image = UIGraphicsGetImageFromCurrentImageContext()
         
         UIGraphicsEndImageContext()
@@ -129,6 +139,75 @@ public extension Creator {
             ]
         
         return attributes
+    }
+    
+    private func drawGrid(context: CGContext, size: CGSize) {
+        config.gridColor.setStroke()
+        context.setLineWidth(size.height * 0.002)
+        
+        let center = CGPoint(x: size.width / 2.0, y: size.height / 2.0)
+ 
+        context.move(to: CGPoint(x: center.x, y: 0.0))
+        context.addLine(to: CGPoint(x: center.x, y: size.height))
+
+        context.move(to: CGPoint(x: 0.0, y: center.y))
+        context.addLine(to: CGPoint(x: size.width, y: center.y))
+
+        context.move(to: CGPoint(x: 0.0, y: 0.0))
+        context.addLine(to: CGPoint(x: size.width, y: size.height))
+
+        context.move(to: CGPoint(x: size.width, y: 0.0))
+        context.addLine(to: CGPoint(x: 0.0, y: size.height))
+
+        context.move(to: CGPoint(x: center.x + goldenRatio(length: center.x), y: 0.0))
+        context.addLine(to: CGPoint(x: center.x + goldenRatio(length: center.x), y: size.height))
+
+        let gr1 = goldenRatio(length: center.x)
+
+        context.move(to: CGPoint(x: center.x - gr1, y: 0.0))
+        context.addLine(to: CGPoint(x: center.x - gr1, y: size.height))
+
+        context.move(to: CGPoint(x: 0.0, y: center.y + gr1))
+        context.addLine(to: CGPoint(x: size.width, y: center.y + gr1))
+
+        context.move(to: CGPoint(x: 0.0, y: center.y - gr1))
+        context.addLine(to: CGPoint(x: size.width, y: center.y - gr1))
+
+        context.addEllipse(in: CGRect.init(
+            x: center.x - gr1,
+            y: center.y - gr1,
+            width: gr1 * 2.0,
+            height: gr1 * 2.0
+        ))
+
+        context.addArc(center: center, radius: sqrt(pow(gr1, 2) + pow(gr1, 2)), startAngle: 0, endAngle: CGFloat(M_PI) * 2.0, clockwise: false)
+
+        let gr2 = goldenRatio(length: goldenRatio(length: goldenRatio(length: size.width)))
+
+        context.move(to: CGPoint(x: gr2, y: 0.0))
+        context.addLine(to: CGPoint(x: gr2, y: size.height))
+
+        context.move(to: CGPoint(x: size.width - gr2, y: 0.0))
+        context.addLine(to: CGPoint(x: size.width - gr2, y: size.height))
+
+        context.move(to: CGPoint(x: 0.0, y: gr2))
+        context.addLine(to: CGPoint(x: size.width, y: gr2))
+
+        context.move(to: CGPoint(x: 0.0, y: size.height - gr2))
+        context.addLine(to: CGPoint(x: size.width, y: size.height - gr2))
+
+        context.addEllipse(in: CGRect.init(
+            x: gr2,
+            y: gr2,
+            width: size.width - gr2 * 2.0,
+            height: size.width - gr2 * 2.0
+        ))
+
+        context.strokePath()
+    }
+
+    private func goldenRatio(length: CGFloat) -> CGFloat {
+        return length / 2.618
     }
 }
 
