@@ -8,7 +8,7 @@ let creator = IconCreator()
 creator.config.fontName = "icomoon"
 creator.config.string = "\u{e655}"
 creator.config.backgroundColor = UIColor.orangeColor()
-creator.preview()
+creator.preview().first
 ```
 
 ![](/swift.png)

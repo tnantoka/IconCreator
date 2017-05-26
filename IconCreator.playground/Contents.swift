@@ -17,7 +17,7 @@ iconCreator.config.textColor = UIColor(white: 0.0, alpha: 0.87)
 iconCreator.config.grid = .preview
 iconCreator.config.gridColor = .green
 
-iconCreator.preview()
+iconCreator.preview().first
 
 iconCreator.save()
 print("$ open \(iconCreator.rootPath)")
@@ -31,7 +31,7 @@ logoCreator.config.backgroundColor = iconCreator.config.backgroundColor
 logoCreator.config.textColor = iconCreator.config.textColor
 logoCreator.config.fontSizeScaleY = 0.6
 logoCreator.config.grid = .none
-logoCreator.preview()
+logoCreator.preview().first
 
 logoCreator.save()
 print("$ open \(logoCreator.rootPath)")
