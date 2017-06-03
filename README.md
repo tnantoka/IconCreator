@@ -27,6 +27,7 @@ print("$ open \(creator.rootPath)") // $ open /path/to/Documents/IconCreator/
 [![](/showcase/iconcreator.png)](/showcase/iconcreator.png)
 ![](/showcase/icon.png)
 ![](/showcase/grid.png)
+![](/showcase/multiline.png)
 
 - [logo.pdf](/logo.pdf)
 

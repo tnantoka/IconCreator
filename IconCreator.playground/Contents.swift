@@ -17,6 +17,17 @@ iconCreator.config.textColor = UIColor(white: 0.0, alpha: 0.87)
 iconCreator.config.grid = .preview
 iconCreator.config.gridColor = .green
 
+// Multiline
+// iconCreator.config.string = "ICON"
+// iconCreator.config.fontKernScaleY = 0.0
+// iconCreator.config.fontOffsetScaleX = 0.0
+// iconCreator.config.fontOffsetScaleY = 0.1 - 0.06
+// iconCreator.config.fontSizeScaleY = 0.4
+// iconCreator.config.grid = .none
+// iconCreator.config2 = iconCreator.config
+// iconCreator.config2?.string = "CRTR"
+// iconCreator.config2?.fontOffsetScaleY = -0.1 + 0.06
+
 iconCreator.preview().first
 
 iconCreator.save()

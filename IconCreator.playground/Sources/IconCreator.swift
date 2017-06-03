@@ -34,7 +34,8 @@ public struct CreatorConfiguration {
 public protocol Creator {
     var sizes: [CGSize] { get set }
     var config: CreatorConfiguration { get }
-    
+    var config2: CreatorConfiguration? { get set }
+
     var prefix: String { get }
     var extname: String { get }
     var scale: CGFloat { get }
@@ -82,9 +83,6 @@ public extension Creator {
     private func create(size: CGSize, previewing: Bool) -> UIImage {
         let rect = CGRect(origin: CGPoint.zero, size: size)
         
-        let offsetX = size.width * config.fontOffsetScaleX
-        let offsetY = size.height * config.fontOffsetScaleY
-        
         let opaque = true
         UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
         
@@ -95,22 +93,11 @@ public extension Creator {
         
         config.beforeDraw(context, size)
         
-        let attributes = textAttributes(size: size)
-        let frame = config.string.boundingRect(
-            with: size,
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: attributes,
-            context: nil
-        )
-        
-        config.string.draw(
-            in: rect.offsetBy(
-                dx: 0.0 + offsetX,
-                dy: rect.midY - frame.midY + offsetY
-            ),
-            withAttributes: attributes
-        )
-        
+        drawText(rect: rect.offsetBy(dx: 0.0, dy: config2 == nil ? 0.0 : -size.height / 4.0), config: config)
+        if let config2 = config2 {
+            drawText(rect: rect.offsetBy(dx: 0.0, dy: size.height / 4.0), config: config2)
+        }
+
         config.afterDraw(context, size)
 
         if config.grid == .preview && previewing || config.grid == .previewAndSave {
@@ -118,12 +105,35 @@ public extension Creator {
         }
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
-        
+
         UIGraphicsEndImageContext()
-        
+
         return image!
     }
-    
+
+    private func drawText(rect: CGRect, config: CreatorConfiguration) {
+        let size = rect.size
+
+        let offsetX = size.width * config.fontOffsetScaleX
+        let offsetY = size.height * config.fontOffsetScaleY
+
+        let attributes = textAttributes(size: size)
+        let frame = config.string.boundingRect(
+            with: size,
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: attributes,
+            context: nil
+        )
+
+        config.string.draw(
+            in: rect.offsetBy(
+                dx: 0.0 + offsetX,
+                dy: (rect.height / 2.0) - frame.midY + offsetY
+            ),
+            withAttributes: attributes
+        )
+    }
+
     private func textAttributes(size: CGSize) -> [String : Any] {
         let fontSize = size.height * config.fontSizeScaleY
         let fontKern = size.height * config.fontKernScaleY
@@ -226,7 +236,8 @@ public class IconCreator: Creator {
         set {}
     }
     public var config = CreatorConfiguration()
-    
+    public var config2: CreatorConfiguration?
+
     public var prefix: String {
         return "icon"
     }
@@ -253,7 +264,8 @@ public class IconCreator: Creator {
 public class LogoCreator: Creator {
     public var sizes = [CGSize(width: 200.0, height: 100.0)]
     public var config = CreatorConfiguration(string: "String")
-    
+    public var config2: CreatorConfiguration?
+
     public var prefix: String {
         return "logo"
     }
