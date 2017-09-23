@@ -134,19 +134,19 @@ public extension Creator {
         )
     }
 
-    private func textAttributes(size: CGSize) -> [String : Any] {
+    private func textAttributes(size: CGSize) -> [NSAttributedStringKey : Any] {
         let fontSize = size.height * config.fontSizeScaleY
         let fontKern = size.height * config.fontKernScaleY
         
         let defaultStyle = NSParagraphStyle.default
         let style = defaultStyle.mutableCopy() as! NSMutableParagraphStyle
         style.alignment = .center
-        let attributes: [String : Any] = [
-            NSFontAttributeName: UIFont(name: config.fontName, size: fontSize)!,
-            NSForegroundColorAttributeName: config.textColor,
-            NSParagraphStyleAttributeName: style,
-            NSKernAttributeName: fontKern,
-            ]
+        let attributes: [NSAttributedStringKey : Any] = [
+            .font: UIFont(name: config.fontName, size: fontSize)!,
+            .foregroundColor: config.textColor,
+            .paragraphStyle: style,
+            .kern: fontKern,
+        ]
         
         return attributes
     }
@@ -190,7 +190,7 @@ public extension Creator {
             height: gr1 * 2.0
         ))
 
-        context.addArc(center: center, radius: sqrt(pow(gr1, 2) + pow(gr1, 2)), startAngle: 0, endAngle: CGFloat(M_PI) * 2.0, clockwise: false)
+        context.addArc(center: center, radius: sqrt(pow(gr1, 2) + pow(gr1, 2)), startAngle: 0, endAngle: CGFloat(Double.pi) * 2.0, clockwise: false)
 
         let gr2 = goldenRatio(length: goldenRatio(length: goldenRatio(length: size.width)))
 
