@@ -134,14 +134,14 @@ public extension Creator {
         )
     }
 
-    private func textAttributes(size: CGSize) -> [NSAttributedStringKey : Any] {
+    private func textAttributes(size: CGSize) -> [NSAttributedString.Key : Any] {
         let fontSize = size.height * config.fontSizeScaleY
         let fontKern = size.height * config.fontKernScaleY
         
         let defaultStyle = NSParagraphStyle.default
         let style = defaultStyle.mutableCopy() as! NSMutableParagraphStyle
         style.alignment = .center
-        let attributes: [NSAttributedStringKey : Any] = [
+        let attributes: [NSAttributedString.Key : Any] = [
             .font: UIFont(name: config.fontName, size: fontSize)!,
             .foregroundColor: config.textColor,
             .paragraphStyle: style,
@@ -253,7 +253,7 @@ public class IconCreator: Creator {
     }
     
     public func data(image: UIImage) -> Data {
-        return UIImagePNGRepresentation(image)!
+        return image.pngData()!
     }
     
     public init() {
