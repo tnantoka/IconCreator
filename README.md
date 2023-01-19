@@ -20,7 +20,6 @@ print("$ open \(creator.rootPath)") // $ open /path/to/Documents/IconCreator/
 ## Showcase
 
 [![](/showcase/jsanywhere.png)](http://javascriptanywhere.net/)
-[![](http://edhita.bornneet.com/assets/logo.png)](http://edhita.bornneet.com/)
 [![](/showcase/140note.png)](http://www.140note.com/)
 [![](https://raw.githubusercontent.com/tnantoka/AppBoard/master/AppBoard/Assets.xcassets/AppIcon.appiconset/icon120.png)](https://github.com/tnantoka/AppBoard)
 [![](/showcase/remaining.png)](http://remaining.bornneet.com/)
